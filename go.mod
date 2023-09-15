@@ -9,7 +9,7 @@ require (
 	github.com/spf13/viper v1.16.0
 )
 
-require github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+require github.com/dgrijalva/jwt-go v3.2.0+incompatible // directed
 
 require (
 	github.com/bytedance/sonic v1.10.0 // indirect
