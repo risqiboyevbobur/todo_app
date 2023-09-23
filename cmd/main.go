@@ -37,6 +37,7 @@ func main() {
 			Host:     "localhost",
 			Port:     "5436",
 			Username: "postgres",
+			
 			Password: "qwerty",
 			DBName:   "postgres",
 			SSLMode:  "disable",
