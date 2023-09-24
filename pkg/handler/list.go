@@ -44,7 +44,6 @@ func (h *Handler) createList(c *gin.Context) {
 		"id": id,
 	})
 }
-
 type getAllListsResponse struct {
 	Data []todo.TodoList `json:"data"`
 }
@@ -86,11 +85,12 @@ func (h *Handler) getAllLists(c *gin.Context) {
 // @ID get-list-by-id
 // @Accept  json
 // @Produce  json
+// @Param id query int true "id"
 // @Success 200 {object} todo.ListsItem
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /api/lists/:id [get]
+// @Router /api/lists/id [get]
 func (h *Handler) getListById(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
@@ -98,7 +98,7 @@ func (h *Handler) getListById(c *gin.Context) {
 		return 
 	}
 
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
 		return
@@ -119,11 +119,13 @@ func (h *Handler) getListById(c *gin.Context) {
 // @ID update list
 // @Accept  json
 // @Produce  json
+// @Param id query int true "id"
+// @Param input body todo.UpdateListInput true "updateList"
 // @Success 200 {object} statusResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /api/lists/:id [put]
+// @Router /api/lists/id [put]
 func (h *Handler) updateList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
@@ -131,7 +133,7 @@ func (h *Handler) updateList(c *gin.Context) {
 		return
 	}
 
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
 		return
@@ -157,12 +159,12 @@ func (h *Handler) updateList(c *gin.Context) {
 // @ID delete list
 // @Accept  json
 // @Produce  json
+// @Param id query int true "id"
 // @Success 200 {object} statusResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /api/lists/:id [delete]
-
+// @Router /api/lists/id [delete]
 func (h *Handler) deleteList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
@@ -170,7 +172,7 @@ func (h *Handler) deleteList(c *gin.Context) {
 		return
 	}
 
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
 		return

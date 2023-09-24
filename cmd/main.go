@@ -17,7 +17,16 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
+// @title Todo App API
+// @version 1.0
+// @description API Server for TodoList Application
 
+// @host localhost:8000
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 

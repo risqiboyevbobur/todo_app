@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
 	todo "github.com/risqiboyevbobur/todo_app.git"
 )
 
@@ -43,6 +42,7 @@ type signInInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
 // @Summary SignIn
 // @Tags auth
 // @Description login
