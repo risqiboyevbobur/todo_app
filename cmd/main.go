@@ -1,29 +1,34 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"os/signal"
+	"syscall"
+
 	// "log"
 	"os"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-
 	todo "github.com/risqiboyevbobur/todo_app.git"
 	"github.com/risqiboyevbobur/todo_app.git/pkg/handler"
 	"github.com/risqiboyevbobur/todo_app.git/pkg/repository"
 	"github.com/risqiboyevbobur/todo_app.git/pkg/service"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
-	if err := initConfigs(); err != nil {
-		logrus.Fatalf("error initilization configs %s", err.Error())
+
+	if err := initConfig(); err != nil {
+		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
+
 	if err := godotenv.Load(); err != nil {
-		logrus.Fatalf("error loading: %s", err.Error())
+		logrus.Fatalf("error loading env variables: %s", err.Error())
 	}
+
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
@@ -33,27 +38,38 @@ func main() {
 		Password: os.Getenv("DB_PASSWORD"),
 	})
 	if err != nil {
-		_,err:= repository.NewPostgresDB(repository.Config{
-			Host:     "localhost",
-			Port:     "5436",
-			Username: "postgres",
-			
-			Password: "qwerty",
-			DBName:   "postgres",
-			SSLMode:  "disable",
-		})
-		logrus.Fatalf("faild to initiliazing db %s", err.Error())
-	fmt.Printf(err.Error())
+		logrus.Fatalf("failed to initialize db: %s", err.Error())
 	}
+
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
+
 	srv := new(todo.Server)
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		logrus.Fatalf("error accured while running http server: %s", err.Error())
+	go func() {
+		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+			logrus.Fatalf("error occured while running http server: %s", err.Error())
+		}
+	}()
+
+	logrus.Print("TodoApp Started")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	logrus.Print("TodoApp Shutting Down")
+
+	if err := srv.Shutdown(context.Background()); err != nil {
+		logrus.Errorf("error occured on server shutting down: %s", err.Error())
+	}
+
+	if err := db.Close(); err != nil {
+		logrus.Errorf("error occured on db connection close: %s", err.Error())
 	}
 }
-func initConfigs() error {
+
+func initConfig() error {
 	viper.AddConfigPath("configs")
 	viper.SetConfigName("config")
 	return viper.ReadInConfig()

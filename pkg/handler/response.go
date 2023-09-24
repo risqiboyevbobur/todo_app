@@ -4,10 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
-type error struct{
+
+type errorResponse struct {
 	Message string `json:"message"`
 }
-func newErrorResponse(c *gin.Context, statusCode int, message string)  {
+
+type statusResponse struct {
+	Status string `json:"status"`
+}
+
+func newErrorResponse(c *gin.Context, statusCode int, message string) {
 	logrus.Error(message)
-	c.AbortWithStatusJSON(statusCode, error{Message: message})
+	c.AbortWithStatusJSON(statusCode, errorResponse{message})
 }
